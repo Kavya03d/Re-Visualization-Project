@@ -1,0 +1,319 @@
+---
+title: "Re-Visualization Project"
+format: html
+editor: visual
+execute:
+  warning: false
+---
+
+## Introduction:
+
+### **OLD VISUALIZATION:**
+
+![](images/suicide-rate-who-mdb.png)
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+# Load required libraries
+
+library(ggplot2)
+library(plotly)
+library(dplyr)
+library(viridis)  
+
+library(ggplot2)
+library(readr)
+library(maps)
+
+```
+
+```{r}
+
+# Read the data
+data <- read_csv(
+  "/Users/kiran/Documents/GMU/STAT 515/Mid Project/suicide-rates-all.csv",
+  col_types = cols(
+    Country = col_character(),
+    Code = col_character(),
+    Year = col_double(),
+    `suscide-rate` = col_double()
+  )
+)
+
+# Step 1: Calculate the average suicide rate for each country and round it off to 2 decimal places
+avg_suicide_by_country <- data %>%
+  group_by(Country) %>%
+  summarise(Average_suicide_rate = round(mean(`suscide-rate`, na.rm = TRUE), 2), .groups = "drop")  # Round to 2 decimals
+
+# Step 2: Prepare the world map data
+world_map <- map_data("world")
+
+# Step 3: Merge the average suicide data with the world map data
+map_data_combined <- world_map %>%
+  left_join(avg_suicide_by_country, by = c("region" = "Country"))  # Ensure the correct data frame is used
+
+# Step 4: Create the map with ggplot
+map_plot <- ggplot(map_data_combined, aes(x = long, y = lat, group = group, fill = Average_suicide_rate)) +
+  geom_polygon(color = "black") +  # Draw country borders
+  scale_fill_gradient(low = "lightcoral", high = "darkred", na.value = "grey50", name = "Average Suicide Rate per 100,000") +
+  labs(title = "Average Suicide Rates by Country over 1960 to 2022", 
+       subtitle = "Based on available data for all years",
+       x = "Longitude", 
+       y = "Latitude") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold"),
+    plot.subtitle = element_text(face = "italic"),
+    legend.position = "bottom"
+  )
+
+# Step 5: Convert to an interactive plot with plotly
+interactive_map <- ggplotly(map_plot, tooltip = c("region", "Average_suicide_rate"))
+
+# Show the interactive map
+interactive_map
+
+```
+
+```{r}
+
+# Read the data
+data <- read_csv(
+  "/Users/kiran/Documents/GMU/STAT 515/Mid Project/suicide-rates-all.csv",
+  col_types = cols(
+    Country = col_character(),
+    Code = col_character(),
+    Year = col_double(),
+    `suscide-rate` = col_double()
+  )
+)
+
+# Step 1: Filter data for the year 2010 and calculate the average suicide rate for each country
+avg_suicide_by_country_2010 <- data %>%
+  filter(Year == 2010) %>%  # Filter for the year 2010
+  group_by(Country) %>%
+  summarise(Average_suicide_rate = round(mean(`suscide-rate`, na.rm = TRUE), 2), .groups = "drop")  # Round to 2 decimals
+
+# Step 2: Prepare the world map data
+world_map <- map_data("world")
+
+# Step 3: Merge the average suicide data for 2010 with the world map data
+map_data_combined <- world_map %>%
+  left_join(avg_suicide_by_country_2010, by = c("region" = "Country"))
+
+# Step 4: Create the map with ggplot
+map_plot <- ggplot(map_data_combined, aes(x = long, y = lat, group = group, fill = Average_suicide_rate)) +
+  geom_polygon(color = "black") +  # Draw country borders
+  scale_fill_gradient(low = "lightblue", high = "darkblue", na.value = "grey50", name = "Average Suicide Rate per 100,000") +
+  labs(title = "Average Suicide Rates by Country in 2010", 
+       subtitle = "Based on data for the year 2010",
+       x = "Longitude", 
+       y = "Latitude") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold"),
+    plot.subtitle = element_text(face = "italic"),
+    legend.position = "bottom"
+  )
+
+# Step 5: Convert to an interactive plot with plotly and set the width and height in ggplotly()
+interactive_map <- ggplotly(map_plot, tooltip = c("region", "Average_suicide_rate"))
+
+# Show the interactive map
+interactive_map
+
+
+
+```
+
+```{r}
+
+
+# Read the data
+data <- read_csv(
+  "/Users/kiran/Documents/GMU/STAT 515/Mid Project/suicide-rates-all.csv",
+  col_types = cols(
+    Country = col_character(),
+    Code = col_character(),
+    Year = col_double(),
+    `suscide-rate` = col_double()
+  )
+)
+
+# Step 1: Calculate the average suicide rate for each year
+avg_suicide_by_year <- data %>%
+  group_by(Year) %>%
+  summarise(Average_suicide_rate = mean(`suscide-rate`, na.rm = TRUE), .groups = "drop")
+
+# Step 2: Create the frequency polygon
+frequency_polygon <- ggplot(avg_suicide_by_year, aes(x = Year, y = Average_suicide_rate)) +
+  geom_line(stat = "identity", color = "blue", size = 1) +  # Line to connect data points
+  geom_point(color = "red") +  # Points for each year
+  labs(title = "Average Suicide Rates by Year all over the world", 
+       x = "Year", 
+       y = "Average Suicide Rate per 100,000") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold"), 
+    axis.title.x = element_text(face = "bold"), 
+    axis.title.y = element_text(face = "bold")
+  )
+
+# Convert the frequency polygon to an interactive plot
+interactive_frequency_polygon <- ggplotly(frequency_polygon)
+
+# Show the interactive frequency polygon
+interactive_frequency_polygon
+```
+
+```{r}
+
+# Read the data
+data <- read_csv(
+  "/Users/kiran/Documents/GMU/STAT 515/Mid Project/suicide-rates-all.csv",
+  col_types = cols(
+    Country = col_character(),
+    Code = col_character(),
+    Year = col_double(),
+    `suscide-rate` = col_double()
+  )
+)
+
+# Step 1: Find top 5 countries with highest average suicide rates
+top_5_countries <- data %>%
+  group_by(Country) %>%
+  summarise(avg_suicide_rate = mean(`suscide-rate`, na.rm = TRUE), .groups = "drop") %>%
+  top_n(5, wt = avg_suicide_rate) %>%
+  arrange(desc(avg_suicide_rate))
+
+# Step 2: Filter the original data to keep only the top 5 countries
+data_top_countries <- data %>%
+  filter(Country %in% top_5_countries$Country)
+
+# Step 3: For each of the top 5 countries, find the top 5 years with highest suicide rates
+top_5_years <- data_top_countries %>%
+  group_by(Country) %>%
+  top_n(5, wt = `suscide-rate`) %>%
+  arrange(Country, desc(`suscide-rate`))
+
+# Step 4: Create a color palette using viridis
+unique_years <- unique(top_5_years$Year)
+color_palette <- viridis::viridis(length(unique_years))  # Generate a palette for the unique years
+
+# Step 5: Create the plot using ggplot
+plot <- ggplot(top_5_years, aes(x = Country, y = `suscide-rate`, fill = factor(Year))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  coord_flip() +
+  scale_fill_manual(values = color_palette, name = "Year") +  # Use the viridis palette
+  labs(title = "Top 5 Years with Highest Suicide Rates in Top 5 Countries", 
+       x = "Country", 
+       y = "Suicide Rate per 100,000") +
+  theme_minimal()
+
+# Step 6: Convert the plot to an interactive plot using plotly
+# Create custom tooltip information using the original data
+interactive_plot <- ggplotly(plot) %>%
+  style(hoverinfo = "text", 
+        text = paste("Country: ", top_5_years$Country, "<br>",
+                     "Year: ", top_5_years$Year, "<br>",
+                     "Suicide Rate: ", top_5_years$`suscide-rate`))
+
+# Show the interactive plot
+interactive_plot
+
+```
+
+```{r}
+
+# Read the data
+data <- read_csv(
+  "/Users/kiran/Documents/GMU/STAT 515/Mid Project/suicide-rates-all.csv",
+  col_types = cols(
+    Country = col_character(),
+    Code = col_character(),
+    Year = col_double(),
+    `suscide-rate` = col_double()
+  )
+)
+
+# Step 1: Find the country with the highest average suicide rates
+top_country <- data %>%
+  group_by(Country) %>%
+  summarise(avg_suicide_rate = mean(`suscide-rate`, na.rm = TRUE), .groups = "drop") %>%
+  top_n(1, wt = avg_suicide_rate) %>%
+  pull(Country)
+
+# Step 2: Filter the data for the top country
+data_top_country <- data %>%
+  filter(Country == top_country)
+
+# Step 3: Create the line plot using ggplot
+plot <- ggplot(data_top_country, aes(x = Year, y = `suscide-rate`, group = Country, color = Country)) +
+  geom_line(size = 1.2) +  # Line plot to show trends
+  geom_point(size = 3) +   # Points on the line for clarity
+  labs(title = paste("Suicide Rates Over the Years for", top_country), 
+       x = "Year", 
+       y = "Suicide Rate per 100,000") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 16),   # Make the plot title bold and increase size
+    axis.title.x = element_text(face = "bold", size = 14),  # Make x-axis title bold and increase size
+    axis.title.y = element_text(face = "bold", size = 14)   # Make y-axis title bold and increase size
+  )
+
+# Step 4: Convert the plot to an interactive plot using plotly
+interactive_plot <- ggplotly(plot, tooltip = c("Year", "suscide-rate"))  # Specify tooltip for interactivity
+
+# Show the interactive plot
+interactive_plot
+
+```
+
+```{r}
+
+# Read the data
+data <- read_csv(
+  "/Users/kiran/Documents/GMU/STAT 515/Mid Project/suicide-rates-all.csv",
+  col_types = cols(
+    Country = col_character(),
+    Code = col_character(),
+    Year = col_double(),
+    `suscide-rate` = col_double()
+  )
+)
+
+# Step 1: Find the top 2 countries with the highest average suicide rates
+top_countries <- data %>%
+  group_by(Country) %>%
+  summarise(avg_suicide_rate = mean(`suscide-rate`, na.rm = TRUE), .groups = "drop") %>%
+  top_n(2, wt = avg_suicide_rate) %>%
+  pull(Country)
+
+# Step 2: Filter the data for top 2 countries
+data_top_countries <- data %>%
+  filter(Country %in% top_countries)  # Use %in% to filter for multiple countries
+
+# Step 3: Create the line plot using ggplot
+plot <- ggplot(data_top_countries, aes(x = Year, y = `suscide-rate`, group = Country, color = Country)) +
+  geom_line(size = 1.2) +  # Line plot to show trends
+  geom_point(size = 3) +   # Points on the line for clarity
+  labs(title = paste("Suicide Rates comparision for top 2 countries"), 
+       x = "Year", 
+       y = "Suicide Rate per 100,000") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 16),   # Make the plot title bold and increase size
+    axis.title.x = element_text(face = "bold", size = 14),  # Make x-axis title bold and increase size
+    axis.title.y = element_text(face = "bold", size = 14)   # Make y-axis title bold and increase size
+  )
+
+# Step 4: Convert the plot to an interactive plot using plotly
+interactive_plot <- ggplotly(plot, tooltip = c("Year", "suscide-rate"))  # Specify tooltip for interactivity
+
+# Show the interactive plot
+interactive_plot
+
+```
